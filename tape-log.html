@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>יומן גיבוי קלטות אופסייט</title>
+    <style>
+        /* ===== CSS Reset & Base ===== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger-color: #dc2626;
+            --danger-hover: #b91c1c;
+            --success-color: #16a34a;
+            --warning-color: #d97706;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --header-bg: #1e293b;
+            --row-hover: #f1f5f9;
+            --row-alt: #f8fafc;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ===== Layout ===== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* ===== Header ===== */
+        .header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* ===== Controls Bar ===== */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .controls-right {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-left: auto;
+        }
+
+        .controls-left {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* ===== Dropdown Menu ===== */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            min-width: 180px;
+            z-index: 1000;
+            margin-top: 0.25rem;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            text-align: right;
+            color: var(--text-color);
+            text-decoration: none;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background-color 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--row-hover);
+        }
+
+        .dropdown-item:first-child {
+            border-top-right-radius: 6px;
+            border-top-left-radius: 6px;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom-right-radius: 6px;
+            border-bottom-left-radius: 6px;
+        }
+
+        .dropdown-btn::after {
+            content: ' ▼';
+            font-size: 0.75rem;
+            margin-right: 0.25rem;
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #cbd5e1;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-hover);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* ===== Search ===== */
+        .search-container {
+            margin-bottom: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--card-bg);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* ===== Table Container ===== */
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        /* ===== Table ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8125rem;
+            min-width: 1000px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            background: var(--header-bg);
+            color: white;
+            padding: 0.75rem 0.5rem;
+            text-align: right;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th:first-child {
+            border-left: none;
+        }
+
+        th:hover {
+            background: #334155;
+        }
+
+        th .sort-indicator {
+            margin-right: 0.25rem;
+            opacity: 0.5;
+        }
+
+        th.sorted .sort-indicator {
+            opacity: 1;
+        }
+
+        td {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tr:nth-child(even) {
+            background: var(--row-alt);
+        }
+
+        tr:hover {
+            background: var(--row-hover);
+        }
+
+        .actions-cell {
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .actions-cell .btn {
+            margin: 0 0.125rem;
+        }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            z-index: 1;
+        }
+
+        .modal-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 0.25rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text-color);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-start;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-color);
+        }
+
+        /* ===== Form ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.8125rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: var(--text-color);
+        }
+
+        .form-group label .required {
+            color: var(--danger-color);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--card-bg);
+            direction: rtl;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error select,
+        .form-group.has-error textarea {
+            border-color: var(--danger-color);
+        }
+
+        .error-message {
+            font-size: 0.75rem;
+            color: var(--danger-color);
+            margin-top: 0.25rem;
+        }
+
+        /* ===== Confirmation Dialog ===== */
+        .confirm-dialog {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .confirm-dialog h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .confirm-dialog p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .confirm-dialog .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* ===== Import Error ===== */
+        .import-error {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        /* ===== Empty State ===== */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        /* ===== Hidden ===== */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ===== File Input ===== */
+        .file-input-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controls-right,
+            .controls-left {
+                justify-content: center;
+                margin-right: 0;
+            }
+
+            .search-input {
+                max-width: 100%;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
+
+        /* ===== Print Styles ===== */
+        @media print {
+            .controls,
+            .search-container,
+            .modal-overlay,
+            .actions-cell {
+                display: none !important;
+            }
+
+            .table-container {
+                overflow: visible;
+                box-shadow: none;
+            }
+
+            table {
+                min-width: 100%;
+            }
+
+            th {
+                background: #333 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>יומן גיבוי קלטות אופסייט</h1>
+            <div class="status-bar">
+                <span class="status-item">
+                    <strong>רשומות:</strong>
+                    <span id="record-count">0</span>
+                </span>
+                <span class="status-item">
+                    <strong>נשמר לאחרונה:</strong>
+                    <span id="last-saved">לא נשמר</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="controls-right">
+                <button class="btn btn-primary" id="btn-add">
+                    ➕ הוסף רשומה
+                </button>
+            </div>
+            <div class="controls-left">
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-btn" id="btn-export-import">
+                        📤 ייצא/ייבא
+                    </button>
+                    <div class="dropdown-menu" id="export-import-menu">
+                        <button class="dropdown-item" id="dropdown-export-csv">
+                            📄 ייצא CSV
+                        </button>
+                        <button class="dropdown-item" id="dropdown-export-json">
+                            📋 ייצא JSON
+                        </button>
+                        <button class="dropdown-item" id="dropdown-import-json">
+                            📥 ייבא JSON
+                        </button>
+                    </div>
+                </div>
+                <input type="file" id="import-file" accept=".json" class="file-input-hidden">
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="חיפוש לפי ברקוד קלטת, מערכות מגובות, יעד, או אחראי...">
+        </div>
+
+        <!-- Import Error -->
+        <div id="import-error" class="import-error hidden"></div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th data-column="createdAt">תאריך רישום <span class="sort-indicator">↕</span></th>
+                        <th data-column="tapeName">ברקוד קלטת <span class="sort-indicator">↕</span></th>
+                        <th data-column="protectedSystems">מערכות מגובות <span class="sort-indicator">↕</span></th>
+                        <th data-column="lastBackupAt">תאריך גיבוי אחרון <span class="sort-indicator">↕</span></th>
+                        <th data-column="exportedAt">תאריך ייצוא <span class="sort-indicator">↕</span></th>
+                        <th data-column="exportedTime">שעת ייצוא <span class="sort-indicator">↕</span></th>
+                        <th data-column="exportedBy">מייצא <span class="sort-indicator">↕</span></th>
+                        <th data-column="offsiteDestination">יעד אופסייט <span class="sort-indicator">↕</span></th>
+                        <th data-column="returnedAt">תאריך החזרה <span class="sort-indicator">↕</span></th>
+                        <th data-column="notes">הערות <span class="sort-indicator">↕</span></th>
+                        <th>פעולות</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="empty-state hidden">
+            <h3>אין רשומות</h3>
+            <p>לחץ על "הוסף רשומה" כדי להתחיל</p>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="form-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">הוסף רשומה חדשה</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="record-form">
+                    <input type="hidden" id="record-id">
+                    <div class="form-grid">
+                        <!-- Tape Barcode -->
+                        <div class="form-group">
+                            <label for="tapeName">ברקוד קלטת <span class="required">*</span></label>
+                            <input type="text" id="tapeName" name="tapeName" placeholder="לדוגמה: CRC240L8">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <!-- Last Backup Date -->
+                        <div class="form-group">
+                            <label for="lastBackupAt">תאריך גיבוי אחרון <span class="required">*</span></label>
+                            <input type="date" id="lastBackupAt" name="lastBackupAt">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <!-- Protected Systems -->
+                        <div class="form-group full-width">
+                            <label for="protectedSystems">מערכות מגובות</label>
+                            <textarea id="protectedSystems" name="protectedSystems" placeholder="שרתים, מכונות וירטואליות..."></textarea>
+                            <span class="error-message"></span>
+                        </div>
+
+                        <!-- Export Date -->
+                        <div class="form-group">
+                            <label for="exportedAt">תאריך ייצוא</label>
+                            <input type="date" id="exportedAt" name="exportedAt">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <!-- Export Time -->
+                        <div class="form-group">
+                            <label for="exportedTime">שעת ייצוא</label>
+                            <input type="time" id="exportedTime" name="exportedTime">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <!-- Exported By -->
+                        <div class="form-group">
+                            <label for="exportedBy">מייצא <span class="conditional-required"></span></label>
+                            <input type="text" id="exportedBy" name="exportedBy" placeholder="שם האחראי">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <!-- Offsite Destination -->
+                        <div class="form-group">
+                            <label for="offsiteDestination">יעד אופסייט <span class="conditional-required"></span></label>
+                            <input type="text" id="offsiteDestination" name="offsiteDestination" placeholder="לדוגמה: כספת / מחסן / ספק">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <!-- Returned Date -->
+                        <div class="form-group">
+                            <label for="returnedAt">תאריך החזרה</label>
+                            <input type="date" id="returnedAt" name="returnedAt">
+                            <span class="error-message"></span>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="form-group full-width">
+                            <label for="notes">הערות</label>
+                            <textarea id="notes" name="notes" placeholder="הערות נוספות..."></textarea>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" id="btn-save">שמור</button>
+                <button type="button" class="btn btn-secondary" id="btn-cancel">ביטול</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Dialog Modal -->
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal" style="max-width: 400px;">
+            <div class="confirm-dialog">
+                <h3 id="confirm-title">אישור</h3>
+                <p id="confirm-message">האם אתה בטוח?</p>
+                <div class="btn-group">
+                    <button class="btn btn-danger" id="confirm-yes">כן, מחק</button>
+                    <button class="btn btn-secondary" id="confirm-no">ביטול</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Duplicate Warning Modal -->
+    <div class="modal-overlay" id="duplicate-modal">
+        <div class="modal" style="max-width: 450px;">
+            <div class="confirm-dialog">
+                <h3>אזהרת כפילות</h3>
+                <p id="duplicate-message">נמצאה רשומה עם ברקוד קלטת, תאריך גיבוי ותאריך ייצוא זהים. האם להמשיך?</p>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="duplicate-yes">כן, שמור בכל זאת</button>
+                    <button class="btn btn-secondary" id="duplicate-no">ביטול</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== Constants =====
+        const STORAGE_KEY = 'tapeLogRecords';
+        const STORAGE_TIMESTAMP_KEY = 'tapeLogLastSaved';
+
+        // ===== Field Configuration =====
+        const FIELDS = [
+            'createdAt', 'tapeName', 'protectedSystems', 'lastBackupAt',
+            'exportedAt', 'exportedTime', 'exportedBy', 'offsiteDestination',
+            'returnedAt', 'notes'
+        ];
+
+        const REQUIRED_FIELDS = ['tapeName', 'lastBackupAt'];
+        const CONDITIONAL_REQUIRED_FIELDS = ['exportedBy', 'offsiteDestination'];
+
+        // Hebrew labels for CSV header
+        const FIELD_LABELS = {
+            createdAt: 'תאריך רישום',
+            tapeName: 'ברקוד קלטת',
+            protectedSystems: 'מערכות מגובות',
+            lastBackupAt: 'תאריך גיבוי אחרון',
+            exportedAt: 'תאריך ייצוא',
+            exportedTime: 'שעת ייצוא',
+            exportedBy: 'מייצא',
+            offsiteDestination: 'יעד אופסייט',
+            returnedAt: 'תאריך החזרה',
+            notes: 'הערות'
+        };
+
+        // ===== State =====
+        let records = [];
+        let sortColumn = 'createdAt';
+        let sortDirection = 'desc';
+        let confirmCallback = null;
+        let duplicateCallback = null;
+
+        // ===== DOM Elements =====
+        const tableBody = document.getElementById('table-body');
+        const emptyState = document.getElementById('empty-state');
+        const formModal = document.getElementById('form-modal');
+        const confirmModal = document.getElementById('confirm-modal');
+        const duplicateModal = document.getElementById('duplicate-modal');
+        const recordForm = document.getElementById('record-form');
+        const searchInput = document.getElementById('search-input');
+        const recordCountEl = document.getElementById('record-count');
+        const lastSavedEl = document.getElementById('last-saved');
+        const importError = document.getElementById('import-error');
+        const importFileInput = document.getElementById('import-file');
+
+        // ===== Data Layer =====
+
+        /**
+         * Load records from LocalStorage
+         */
+        function loadData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    records = JSON.parse(stored);
+                    // Ensure records is an array
+                    if (!Array.isArray(records)) {
+                        records = [];
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading data:', e);
+                records = [];
+            }
+        }
+
+        /**
+         * Save records to LocalStorage
+         */
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const timestamp = `${day}/${month}/${year} ${hours}:${minutes}`;
+                localStorage.setItem(STORAGE_TIMESTAMP_KEY, timestamp);
+                updateStatus();
+            } catch (e) {
+                console.error('Error saving data:', e);
+            }
+        }
+
+        /**
+         * Generate unique ID
+         */
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        // ===== CRUD Operations =====
+
+        /**
+         * Format current date as DD/MM/YYYY
+         */
+        function getCurrentDateFormatted() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        /**
+         * Add a new record
+         */
+        function addRecord(record) {
+            record.id = generateId();
+            record.createdAt = getCurrentDateFormatted();
+            records.push(record);
+            saveData();
+            renderTable();
+        }
+
+        /**
+         * Edit existing record
+         */
+        function editRecord(id, updates) {
+            const index = records.findIndex(r => r.id === id);
+            if (index !== -1) {
+                records[index] = { ...records[index], ...updates };
+                saveData();
+                renderTable();
+            }
+        }
+
+        /**
+         * Delete a record
+         */
+        function deleteRecord(id) {
+            records = records.filter(r => r.id !== id);
+            saveData();
+            renderTable();
+        }
+
+        // ===== Validation =====
+
+        /**
+         * Validate form data
+         * Returns object with isValid and errors
+         */
+        function validateForm(formData) {
+            const errors = {};
+
+            // Required fields
+            REQUIRED_FIELDS.forEach(field => {
+                if (!formData[field] || formData[field].trim() === '') {
+                    errors[field] = 'שדה חובה';
+                }
+            });
+
+            // Conditional required fields (if exportedAt is filled)
+            if (formData.exportedAt && formData.exportedAt.trim() !== '') {
+                CONDITIONAL_REQUIRED_FIELDS.forEach(field => {
+                    if (!formData[field] || formData[field].trim() === '') {
+                        errors[field] = 'שדה חובה כאשר תאריך ייצוא מוזן';
+                    }
+                });
+            }
+
+            return {
+                isValid: Object.keys(errors).length === 0,
+                errors
+            };
+        }
+
+        /**
+         * Check for duplicate record
+         */
+        function checkDuplicate(formData, excludeId = null) {
+            return records.some(r => {
+                if (excludeId && r.id === excludeId) return false;
+                return r.tapeName === formData.tapeName &&
+                       r.lastBackupAt === formData.lastBackupAt &&
+                       r.exportedAt === formData.exportedAt;
+            });
+        }
+
+        /**
+         * Clear form errors
+         */
+        function clearFormErrors() {
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('has-error');
+                const errorEl = group.querySelector('.error-message');
+                if (errorEl) errorEl.textContent = '';
+            });
+        }
+
+        /**
+         * Show form errors
+         */
+        function showFormErrors(errors) {
+            Object.entries(errors).forEach(([field, message]) => {
+                const input = document.getElementById(field);
+                if (input) {
+                    const group = input.closest('.form-group');
+                    group.classList.add('has-error');
+                    const errorEl = group.querySelector('.error-message');
+                    if (errorEl) errorEl.textContent = message;
+                }
+            });
+        }
+
+        // ===== Rendering =====
+
+        /**
+         * Render the data table
+         */
+        function renderTable() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            let filteredRecords = applyFilters(records, searchTerm);
+
+            // Sort records
+            filteredRecords = sortRecords(filteredRecords, sortColumn, sortDirection);
+
+            // Update empty state visibility
+            if (records.length === 0) {
+                emptyState.classList.remove('hidden');
+                tableBody.innerHTML = '';
+            } else {
+                emptyState.classList.add('hidden');
+
+                if (filteredRecords.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 2rem;">לא נמצאו תוצאות</td></tr>`;
+                } else {
+                    tableBody.innerHTML = filteredRecords.map(record => createTableRow(record)).join('');
+                }
+            }
+
+            updateStatus();
+            updateSortIndicators();
+        }
+
+        /**
+         * Create a table row for a record
+         */
+        function createTableRow(record) {
+            return `
+                <tr data-id="${record.id}">
+                    <td>${formatDate(record.createdAt)}</td>
+                    <td>${escapeHtml(record.tapeName || '')}</td>
+                    <td>${escapeHtml(record.protectedSystems || '')}</td>
+                    <td>${formatDate(record.lastBackupAt)}</td>
+                    <td>${formatDate(record.exportedAt)}</td>
+                    <td>${record.exportedTime || ''}</td>
+                    <td>${escapeHtml(record.exportedBy || '')}</td>
+                    <td>${escapeHtml(record.offsiteDestination || '')}</td>
+                    <td>${formatDate(record.returnedAt)}</td>
+                    <td>${escapeHtml(record.notes || '')}</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-sm btn-edit" data-id="${record.id}">✏️</button>
+                        <button class="btn btn-danger btn-sm btn-delete" data-id="${record.id}">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // ===== Filtering & Sorting =====
+
+        /**
+         * Apply search filters to records
+         */
+        function applyFilters(records, searchTerm) {
+            if (!searchTerm) return records;
+
+            return records.filter(record => {
+                const searchFields = [
+                    record.tapeName,
+                    record.offsiteDestination,
+                    record.exportedBy,
+                    record.protectedSystems,
+                    record.notes
+                ];
+
+                return searchFields.some(field =>
+                    field && field.toLowerCase().includes(searchTerm)
+                );
+            });
+        }
+
+        /**
+         * Sort records by column
+         */
+        function sortRecords(records, column, direction) {
+            return [...records].sort((a, b) => {
+                let valA = a[column] || '';
+                let valB = b[column] || '';
+
+                // Handle date columns
+                const dateColumns = ['createdAt', 'lastBackupAt', 'exportedAt', 'returnedAt'];
+                if (dateColumns.includes(column)) {
+                    valA = valA ? new Date(valA).getTime() : 0;
+                    valB = valB ? new Date(valB).getTime() : 0;
+                } else {
+                    valA = valA.toString().toLowerCase();
+                    valB = valB.toString().toLowerCase();
+                }
+
+                if (valA < valB) return direction === 'asc' ? -1 : 1;
+                if (valA > valB) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        /**
+         * Handle column header click for sorting
+         */
+        function handleSort(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            renderTable();
+        }
+
+        /**
+         * Update sort indicators in headers
+         */
+        function updateSortIndicators() {
+            document.querySelectorAll('th[data-column]').forEach(th => {
+                const column = th.dataset.column;
+                const indicator = th.querySelector('.sort-indicator');
+                th.classList.remove('sorted');
+
+                if (column === sortColumn) {
+                    th.classList.add('sorted');
+                    indicator.textContent = sortDirection === 'asc' ? '↑' : '↓';
+                } else {
+                    indicator.textContent = '↕';
+                }
+            });
+        }
+
+        // ===== Import/Export =====
+
+        /**
+         * Export records to CSV
+         */
+        function exportCSV() {
+            if (records.length === 0) {
+                showImportError('אין רשומות לייצוא');
+                return;
+            }
+
+            // Create CSV header with Hebrew labels
+            const headers = FIELDS.map(f => FIELD_LABELS[f]);
+            const rows = [headers];
+
+            // Add data rows
+            records.forEach(record => {
+                const row = FIELDS.map(field => {
+                    const value = record[field] || '';
+                    // Escape CSV: wrap in quotes if contains comma, newline, or quote
+                    if (value.toString().includes(',') || value.toString().includes('\n') || value.toString().includes('"')) {
+                        return `"${value.toString().replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                });
+                rows.push(row);
+            });
+
+            // Create CSV content with BOM for Hebrew support
+            const bom = '\uFEFF';
+            const csvContent = bom + rows.map(row => row.join(',')).join('\n');
+
+            // Download
+            downloadFile(csvContent, 'tape-log.csv', 'text/csv;charset=utf-8');
+        }
+
+        /**
+         * Export records to JSON
+         */
+        function exportJSON() {
+            if (records.length === 0) {
+                showImportError('אין רשומות לייצוא');
+                return;
+            }
+
+            const jsonContent = JSON.stringify(records, null, 2);
+            downloadFile(jsonContent, 'tape-log.json', 'application/json;charset=utf-8');
+        }
+
+        /**
+         * Import records from JSON file
+         */
+        function importJSON(file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    // Validate structure
+                    if (!Array.isArray(data)) {
+                        showImportError('קובץ JSON לא תקין: צפוי מערך של רשומות');
+                        return;
+                    }
+
+                    // Validate each record has required fields
+                    for (let i = 0; i < data.length; i++) {
+                        const record = data[i];
+                        if (typeof record !== 'object' || record === null) {
+                            showImportError(`רשומה ${i + 1} אינה אובייקט תקין`);
+                            return;
+                        }
+
+                        // Check for at least tapeName
+                        if (!record.tapeName) {
+                            showImportError(`רשומה ${i + 1} חסרה שדה "tapeName"`);
+                            return;
+                        }
+                    }
+
+                    // Import successful - add IDs if missing and merge
+                    data.forEach(record => {
+                        if (!record.id) {
+                            record.id = generateId();
+                        }
+                        if (!record.createdAt) {
+                            record.createdAt = getCurrentDateFormatted();
+                        } else {
+                            // Convert existing createdAt to DD/MM/YYYY if needed
+                            if (record.createdAt.includes('-') && record.createdAt.length === 10) {
+                                const parts = record.createdAt.split('-');
+                                if (parts.length === 3 && parts[0].length === 4) {
+                                    record.createdAt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                                }
+                            }
+                        }
+                    });
+
+                    records = data;
+                    saveData();
+                    renderTable();
+                    hideImportError();
+
+                } catch (e) {
+                    showImportError('שגיאה בקריאת קובץ JSON: ' + e.message);
+                }
+            };
+
+            reader.onerror = function() {
+                showImportError('שגיאה בקריאת הקובץ');
+            };
+
+            reader.readAsText(file);
+        }
+
+        /**
+         * Download file helper
+         */
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // ===== UI Functions =====
+
+        /**
+         * Open add form modal
+         */
+        function openAddForm() {
+            document.getElementById('modal-title').textContent = 'הוסף רשומה חדשה';
+            document.getElementById('record-id').value = '';
+            recordForm.reset();
+            clearFormErrors();
+            formModal.classList.add('active');
+        }
+
+        /**
+         * Convert date from DD/MM/YYYY to YYYY-MM-DD for input fields
+         */
+        function convertDateForInput(dateStr) {
+            if (!dateStr) return '';
+            // If already in YYYY-MM-DD format, return as is
+            if (dateStr.includes('-') && dateStr.length === 10 && dateStr.split('-')[0].length === 4) {
+                return dateStr;
+            }
+            // If in DD/MM/YYYY format, convert to YYYY-MM-DD
+            if (dateStr.includes('/') && dateStr.length === 10) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+            // Try to parse and convert
+            try {
+                const date = new Date(dateStr);
+                if (!isNaN(date.getTime())) {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                }
+            } catch {}
+            return dateStr;
+        }
+
+        /**
+         * Open edit form modal
+         */
+        function openEditForm(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+
+            document.getElementById('modal-title').textContent = 'ערוך רשומה';
+            document.getElementById('record-id').value = id;
+            clearFormErrors();
+
+            // Populate form fields
+            FIELDS.forEach(field => {
+                if (field === 'createdAt') return; // Skip createdAt
+                const input = document.getElementById(field);
+                if (input) {
+                    // Convert date fields to YYYY-MM-DD format for input type="date"
+                    if (input.type === 'date' && record[field]) {
+                        input.value = convertDateForInput(record[field]);
+                    } else {
+                        input.value = record[field] || '';
+                    }
+                }
+            });
+
+            formModal.classList.add('active');
+        }
+
+        /**
+         * Close form modal
+         */
+        function closeForm() {
+            formModal.classList.remove('active');
+            clearFormErrors();
+        }
+
+        /**
+         * Update status bar
+         */
+        function updateStatus() {
+            recordCountEl.textContent = records.length;
+
+            const lastSaved = localStorage.getItem(STORAGE_TIMESTAMP_KEY);
+            lastSavedEl.textContent = lastSaved || 'לא נשמר';
+        }
+
+        /**
+         * Show confirmation dialog
+         */
+        function showConfirm(title, message, callback) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+            confirmCallback = callback;
+            confirmModal.classList.add('active');
+        }
+
+        /**
+         * Hide confirmation dialog
+         */
+        function hideConfirm() {
+            confirmModal.classList.remove('active');
+            confirmCallback = null;
+        }
+
+        /**
+         * Show duplicate warning
+         */
+        function showDuplicateWarning(callback) {
+            duplicateCallback = callback;
+            duplicateModal.classList.add('active');
+        }
+
+        /**
+         * Hide duplicate warning
+         */
+        function hideDuplicateWarning() {
+            duplicateModal.classList.remove('active');
+            duplicateCallback = null;
+        }
+
+        /**
+         * Show import error
+         */
+        function showImportError(message) {
+            importError.textContent = message;
+            importError.classList.remove('hidden');
+            setTimeout(hideImportError, 5000);
+        }
+
+        /**
+         * Hide import error
+         */
+        function hideImportError() {
+            importError.classList.add('hidden');
+        }
+
+        // ===== Utility Functions =====
+
+        /**
+         * Escape HTML to prevent XSS
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+         * Format date for display (DD/MM/YYYY)
+         */
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                // If already in DD/MM/YYYY format, return as is
+                if (dateStr.includes('/') && dateStr.length === 10) {
+                    const parts = dateStr.split('/');
+                    if (parts.length === 3 && parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                        return dateStr;
+                    }
+                }
+                // Handle YYYY-MM-DD format
+                if (dateStr.includes('-') && dateStr.length === 10) {
+                    const parts = dateStr.split('-');
+                    if (parts.length === 3 && parts[0].length === 4) {
+                        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+                    }
+                }
+                // Handle other date formats
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                return `${day}/${month}/${year}`;
+            } catch {
+                return dateStr;
+            }
+        }
+
+        /**
+         * Get form data as object
+         */
+        function getFormData() {
+            const data = {};
+            FIELDS.forEach(field => {
+                if (field === 'createdAt') return;
+                const input = document.getElementById(field);
+                if (input) {
+                    data[field] = input.value.trim();
+                }
+            });
+            return data;
+        }
+
+        // ===== Event Handlers =====
+
+        /**
+         * Handle form submission
+         */
+        function handleFormSubmit(forceSave = false) {
+            clearFormErrors();
+            const formData = getFormData();
+            const recordId = document.getElementById('record-id').value;
+
+            // Validate
+            const validation = validateForm(formData);
+            if (!validation.isValid) {
+                showFormErrors(validation.errors);
+                return;
+            }
+
+            // Check for duplicates (unless forcing save)
+            if (!forceSave && checkDuplicate(formData, recordId || null)) {
+                showDuplicateWarning(() => {
+                    handleFormSubmit(true);
+                });
+                return;
+            }
+
+            // Save
+            if (recordId) {
+                editRecord(recordId, formData);
+            } else {
+                addRecord(formData);
+            }
+
+            closeForm();
+        }
+
+        /**
+         * Handle delete button click
+         */
+        function handleDelete(id) {
+            const record = records.find(r => r.id === id);
+            if (!record) return;
+
+            showConfirm(
+                'מחק רשומה',
+                `האם אתה בטוח שברצונך למחוק את הרשומה "${record.tapeName}"?`,
+                () => {
+                    deleteRecord(id);
+                    hideConfirm();
+                }
+            );
+        }
+
+        // ===== Initialize =====
+
+        function init() {
+            // Load data
+            loadData();
+            renderTable();
+
+            // Add button
+            document.getElementById('btn-add').addEventListener('click', openAddForm);
+
+            // Export/Import dropdown
+            const exportImportBtn = document.getElementById('btn-export-import');
+            const exportImportMenu = document.getElementById('export-import-menu');
+            
+            exportImportBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                exportImportMenu.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!exportImportBtn.contains(e.target) && !exportImportMenu.contains(e.target)) {
+                    exportImportMenu.classList.remove('active');
+                }
+            });
+
+            // Dropdown items
+            document.getElementById('dropdown-export-csv').addEventListener('click', () => {
+                exportImportMenu.classList.remove('active');
+                exportCSV();
+            });
+
+            document.getElementById('dropdown-export-json').addEventListener('click', () => {
+                exportImportMenu.classList.remove('active');
+                exportJSON();
+            });
+
+            document.getElementById('dropdown-import-json').addEventListener('click', () => {
+                exportImportMenu.classList.remove('active');
+                importFileInput.click();
+            });
+
+            importFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    importJSON(e.target.files[0]);
+                    e.target.value = ''; // Reset for same file selection
+                }
+            });
+
+            // Search input
+            searchInput.addEventListener('input', () => {
+                renderTable();
+            });
+
+            // Form modal
+            document.getElementById('modal-close').addEventListener('click', closeForm);
+            document.getElementById('btn-cancel').addEventListener('click', closeForm);
+            document.getElementById('btn-save').addEventListener('click', () => handleFormSubmit());
+
+            // Close modal on overlay click
+            formModal.addEventListener('click', (e) => {
+                if (e.target === formModal) closeForm();
+            });
+
+            // Confirm modal
+            document.getElementById('confirm-yes').addEventListener('click', () => {
+                if (confirmCallback) confirmCallback();
+            });
+            document.getElementById('confirm-no').addEventListener('click', hideConfirm);
+            confirmModal.addEventListener('click', (e) => {
+                if (e.target === confirmModal) hideConfirm();
+            });
+
+            // Duplicate modal
+            document.getElementById('duplicate-yes').addEventListener('click', () => {
+                if (duplicateCallback) {
+                    hideDuplicateWarning();
+                    duplicateCallback();
+                }
+            });
+            document.getElementById('duplicate-no').addEventListener('click', hideDuplicateWarning);
+            duplicateModal.addEventListener('click', (e) => {
+                if (e.target === duplicateModal) hideDuplicateWarning();
+            });
+
+            // Table actions (event delegation)
+            tableBody.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+
+                const id = btn.dataset.id;
+                if (btn.classList.contains('btn-edit')) {
+                    openEditForm(id);
+                } else if (btn.classList.contains('btn-delete')) {
+                    handleDelete(id);
+                }
+            });
+
+            // Table header sorting
+            document.querySelectorAll('th[data-column]').forEach(th => {
+                th.addEventListener('click', () => {
+                    handleSort(th.dataset.column);
+                });
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Escape to close modals
+                if (e.key === 'Escape') {
+                    if (formModal.classList.contains('active')) {
+                        closeForm();
+                    }
+                    if (confirmModal.classList.contains('active')) {
+                        hideConfirm();
+                    }
+                    if (duplicateModal.classList.contains('active')) {
+                        hideDuplicateWarning();
+                    }
+                }
+
+                // Enter on form to submit (if not in textarea)
+                if (e.key === 'Enter' && formModal.classList.contains('active') && e.target.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    handleFormSubmit();
+                }
+            });
+
+            // Update conditional required indicators
+            document.getElementById('exportedAt').addEventListener('change', updateConditionalLabels);
+            updateConditionalLabels();
+        }
+
+        /**
+         * Update conditional required field labels
+         */
+        function updateConditionalLabels() {
+            const exportedAt = document.getElementById('exportedAt').value;
+            const conditionalLabels = document.querySelectorAll('.conditional-required');
+            conditionalLabels.forEach(label => {
+                label.innerHTML = exportedAt ? '<span class="required">*</span>' : '';
+            });
+        }
+
+        // Run initialization
+        init();
+    </script>
+</body>
+</html>
