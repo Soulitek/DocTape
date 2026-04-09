@@ -133,6 +133,107 @@
             color: var(--text-muted);
         }
 
+        /* ===== File Storage ===== */
+        .file-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            max-width: 260px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .file-indicator.has-file {
+            color: var(--success-color);
+        }
+
+        .file-indicator.no-file {
+            color: var(--warning-color);
+        }
+
+        /* ===== File Setup Modal ===== */
+        .setup-modal-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .setup-modal-body p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .setup-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .setup-option-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--card-bg);
+            cursor: pointer;
+            text-align: right;
+            transition: border-color 0.15s, background 0.15s;
+            width: 100%;
+        }
+
+        .setup-option-btn:hover {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+
+        .setup-option-btn .option-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .setup-option-btn .option-text strong {
+            display: block;
+            font-size: 0.9375rem;
+            color: var(--text-color);
+            margin-bottom: 0.2rem;
+        }
+
+        .setup-option-btn .option-text span {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .setup-skip {
+            margin-top: 1rem;
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-decoration: underline;
+            padding: 0.25rem;
+        }
+
+        .setup-skip:hover {
+            color: var(--text-color);
+        }
+
+        .unsupported-notice {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.8125rem;
+            color: #92400e;
+            text-align: right;
+        }
+
         /* ===== Controls Bar ===== */
         .controls {
             display: flex;
@@ -646,13 +747,16 @@
                     <strong>נשמר לאחרונה:</strong>
                     <span id="last-saved">לא נשמר</span>
                 </span>
+                <span class="status-item">
+                    <span id="file-indicator" class="file-indicator no-file">📁 לא נבחר קובץ</span>
+                </span>
             </div>
         </header>
 
         <!-- Privacy Notice -->
         <div class="privacy-notice">
             <strong>🔒 פרטיות ונתונים:</strong>
-            כל הנתונים נשמרים <strong>רק בדפדפן שלך</strong> (LocalStorage). הנתונים <strong>לא נשלחים לענן</strong> ולא משותפים עם משתמשים אחרים. כל משתמש רואה רק את הנתונים שלו.
+            הנתונים נשמרים <strong>רק על המחשב שלך</strong> — בקובץ JSON שתבחר, עם גיבוי ב-LocalStorage. הנתונים <strong>לא נשלחים לענן</strong> ולא משותפים עם אחרים.
         </div>
 
         <!-- Controls -->
@@ -680,6 +784,10 @@
                         </button>
                         <button class="dropdown-item" id="dropdown-import-json">
                             📥 ייבא JSON
+                        </button>
+                        <hr style="margin: 0.25rem 0; border-color: var(--border-color);">
+                        <button class="dropdown-item" id="dropdown-change-file">
+                            📂 שנה קובץ נתונים
                         </button>
                     </div>
                 </div>
@@ -853,10 +961,49 @@
         </div>
     </div>
 
+    <!-- File Setup Modal -->
+    <div class="modal-overlay" id="file-setup-modal">
+        <div class="modal" style="max-width: 480px;">
+            <div class="modal-header">
+                <h2>📂 בחר קובץ נתונים</h2>
+            </div>
+            <div class="setup-modal-body">
+                <p>
+                    בחר קובץ JSON לשמירת הנתונים שלך.<br>
+                    הקובץ ישמר על הדיסק שלך — לא בדפדפן — כך הנתונים ישמרו גם אחרי ניקוי הדפדפן.
+                </p>
+                <div id="fsa-unsupported-notice" class="unsupported-notice hidden">
+                    ⚠️ הדפדפן שלך אינו תומך ב-File System Access API.<br>
+                    השתמש ב-Chrome או Edge לתמיכה מלאה.
+                </div>
+                <div class="setup-options">
+                    <button class="setup-option-btn" id="setup-open-file">
+                        <span class="option-icon">📂</span>
+                        <span class="option-text">
+                            <strong>פתח קובץ קיים</strong>
+                            <span>בחר קובץ JSON שכבר יש לך</span>
+                        </span>
+                    </button>
+                    <button class="setup-option-btn" id="setup-new-file">
+                        <span class="option-icon">📄</span>
+                        <span class="option-text">
+                            <strong>צור קובץ חדש</strong>
+                            <span>שמור נתונים בקובץ חדש במיקום שתבחר</span>
+                        </span>
+                    </button>
+                </div>
+                <button class="setup-skip" id="setup-skip">המשך ללא קובץ (השתמש ב-LocalStorage)</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ===== Constants =====
         const STORAGE_KEY = 'tapeLogRecords';
         const STORAGE_TIMESTAMP_KEY = 'tapeLogLastSaved';
+        const IDB_NAME = 'TapeLogDB';
+        const IDB_STORE = 'meta';
+        const IDB_HANDLE_KEY = 'fileHandle';
 
         // ===== Field Configuration =====
         const FIELDS = [
@@ -884,6 +1031,7 @@
 
         // ===== State =====
         let records = [];
+        let fileHandle = null;
         let sortColumn = 'createdAt';
         let sortDirection = 'desc';
         let confirmCallback = null;
@@ -903,31 +1051,194 @@
         const importError = document.getElementById('import-error');
         const importFileInput = document.getElementById('import-file');
 
+        // ===== File System API =====
+
+        function isFileSystemSupported() {
+            return typeof window.showOpenFilePicker === 'function';
+        }
+
+        function openIDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(IDB_NAME, 1);
+                req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+                req.onsuccess = e => resolve(e.target.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function getStoredHandle() {
+            try {
+                const db = await openIDB();
+                return await new Promise(resolve => {
+                    const req = db.transaction(IDB_STORE).objectStore(IDB_STORE).get(IDB_HANDLE_KEY);
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                });
+            } catch { return null; }
+        }
+
+        async function storeHandle(handle) {
+            try {
+                const db = await openIDB();
+                await new Promise((resolve, reject) => {
+                    const tx = db.transaction(IDB_STORE, 'readwrite');
+                    tx.objectStore(IDB_STORE).put(handle, IDB_HANDLE_KEY);
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch (e) { console.error('storeHandle:', e); }
+        }
+
+        async function clearStoredHandle() {
+            try {
+                const db = await openIDB();
+                await new Promise(resolve => {
+                    const tx = db.transaction(IDB_STORE, 'readwrite');
+                    tx.objectStore(IDB_STORE).delete(IDB_HANDLE_KEY);
+                    tx.oncomplete = resolve;
+                });
+            } catch (e) { console.error('clearStoredHandle:', e); }
+            fileHandle = null;
+            updateFileIndicator();
+        }
+
+        async function verifyPermission(handle) {
+            if (!handle) return false;
+            try {
+                if (await handle.queryPermission({ mode: 'readwrite' }) === 'granted') return true;
+                if (await handle.requestPermission({ mode: 'readwrite' }) === 'granted') return true;
+            } catch {}
+            return false;
+        }
+
+        async function readFromFileHandle(handle) {
+            const file = await handle.getFile();
+            const text = await file.text();
+            const data = JSON.parse(text);
+            return Array.isArray(data) ? data : [];
+        }
+
+        async function writeToFileHandle(handle, data) {
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(data, null, 2));
+            await writable.close();
+        }
+
+        function updateFileIndicator() {
+            const el = document.getElementById('file-indicator');
+            if (!el) return;
+            if (fileHandle) {
+                el.textContent = '📂 ' + fileHandle.name;
+                el.className = 'file-indicator has-file';
+            } else {
+                el.textContent = '📁 לא נבחר קובץ';
+                el.className = 'file-indicator no-file';
+            }
+        }
+
+        function openFileSetupModal() {
+            const modal = document.getElementById('file-setup-modal');
+            if (!isFileSystemSupported()) {
+                document.getElementById('fsa-unsupported-notice').classList.remove('hidden');
+                document.getElementById('setup-open-file').disabled = true;
+                document.getElementById('setup-new-file').disabled = true;
+            }
+            modal.classList.add('active');
+        }
+
+        function closeFileSetupModal() {
+            document.getElementById('file-setup-modal').classList.remove('active');
+        }
+
+        async function pickAndLoadFile(mode) {
+            try {
+                let handle;
+                if (mode === 'open') {
+                    [handle] = await window.showOpenFilePicker({
+                        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+                        multiple: false
+                    });
+                    // Load existing data from the chosen file
+                    try {
+                        const data = await readFromFileHandle(handle);
+                        records = data;
+                        // Mirror to localStorage
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+                    } catch {
+                        // File is empty or invalid — start fresh, write current records
+                        await writeToFileHandle(handle, records);
+                    }
+                } else {
+                    handle = await window.showSaveFilePicker({
+                        suggestedName: 'tape-log-data.json',
+                        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+                    });
+                    // Write current records (may be [] on first use, or existing from localStorage)
+                    await writeToFileHandle(handle, records);
+                }
+                fileHandle = handle;
+                await storeHandle(handle);
+                updateFileIndicator();
+                closeFileSetupModal();
+                renderTable();
+            } catch (e) {
+                if (e.name !== 'AbortError') {
+                    console.error('File picker error:', e);
+                    showImportError('שגיאה בבחירת קובץ: ' + e.message);
+                }
+            }
+        }
+
         // ===== Data Layer =====
 
         /**
-         * Load records from LocalStorage
+         * Load records from file handle (if valid) or fall back to LocalStorage.
+         * Shows the setup modal if no file handle is stored.
          */
-        function loadData() {
+        async function loadData() {
+            // Try file storage first
+            if (isFileSystemSupported()) {
+                const handle = await getStoredHandle();
+                if (handle) {
+                    const permitted = await verifyPermission(handle);
+                    if (permitted) {
+                        try {
+                            records = await readFromFileHandle(handle);
+                            fileHandle = handle;
+                            updateFileIndicator();
+                            return; // success — skip localStorage
+                        } catch (e) {
+                            console.error('File read error:', e);
+                        }
+                    }
+                }
+                // No valid handle — load from localStorage then prompt user
+                loadFromLocalStorage();
+                openFileSetupModal();
+                return;
+            }
+            // Browser doesn't support FSA — use localStorage only
+            loadFromLocalStorage();
+        }
+
+        function loadFromLocalStorage() {
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored) {
                     records = JSON.parse(stored);
-                    // Ensure records is an array
-                    if (!Array.isArray(records)) {
-                        records = [];
-                    }
+                    if (!Array.isArray(records)) records = [];
                 }
             } catch (e) {
-                console.error('Error loading data:', e);
+                console.error('Error loading from localStorage:', e);
                 records = [];
             }
         }
 
         /**
-         * Save records to LocalStorage
+         * Save records — always mirrors to localStorage, and writes to file if one is set.
          */
         function saveData() {
+            // Synchronous: localStorage mirror + UI update
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
                 const now = new Date();
@@ -940,7 +1251,14 @@
                 localStorage.setItem(STORAGE_TIMESTAMP_KEY, timestamp);
                 updateStatus();
             } catch (e) {
-                console.error('Error saving data:', e);
+                console.error('Error saving to localStorage:', e);
+            }
+            // Asynchronous: write to file (fire and forget)
+            if (fileHandle) {
+                writeToFileHandle(fileHandle, records).catch(e => {
+                    console.error('File write error:', e);
+                    showImportError('שגיאה בשמירה לקובץ — ' + e.message);
+                });
             }
         }
 
@@ -1454,6 +1772,8 @@
 
             const lastSaved = localStorage.getItem(STORAGE_TIMESTAMP_KEY);
             lastSavedEl.textContent = lastSaved || 'לא נשמר';
+
+            updateFileIndicator();
         }
 
         /**
@@ -1677,9 +1997,9 @@
 
         // ===== Initialize =====
 
-        function init() {
-            // Load data
-            loadData();
+        async function init() {
+            // Load data (async: may read from file or show setup modal)
+            await loadData();
             renderTable();
 
             // Add button
@@ -1753,6 +2073,19 @@
             document.getElementById('dropdown-import-json').addEventListener('click', () => {
                 exportImportMenu.classList.remove('active');
                 importFileInput.click();
+            });
+
+            document.getElementById('dropdown-change-file').addEventListener('click', () => {
+                exportImportMenu.classList.remove('active');
+                openFileSetupModal();
+            });
+
+            // File setup modal
+            document.getElementById('setup-open-file').addEventListener('click', () => pickAndLoadFile('open'));
+            document.getElementById('setup-new-file').addEventListener('click', () => pickAndLoadFile('new'));
+            document.getElementById('setup-skip').addEventListener('click', () => {
+                closeFileSetupModal();
+                clearStoredHandle();
             });
 
             importFileInput.addEventListener('change', (e) => {
@@ -1830,6 +2163,9 @@
                     }
                     if (duplicateModal.classList.contains('active')) {
                         hideDuplicateWarning();
+                    }
+                    if (document.getElementById('file-setup-modal').classList.contains('active')) {
+                        closeFileSetupModal();
                     }
                 }
 
