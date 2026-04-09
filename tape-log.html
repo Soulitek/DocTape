@@ -74,6 +74,65 @@
             gap: 0.25rem;
         }
 
+        /* ===== Recycle Bin Badge ===== */
+        .btn-recycle {
+            position: relative;
+        }
+
+        .recycle-badge {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            background: var(--danger-color);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 999px;
+            min-width: 18px;
+            height: 18px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            pointer-events: none;
+        }
+
+        .recycle-badge.visible {
+            display: flex;
+        }
+
+        /* ===== Recycle Bin Modal ===== */
+        .recycle-bin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .recycle-bin-table th {
+            background: #334155;
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .recycle-bin-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .recycle-bin-table tr:hover td {
+            background: var(--row-hover);
+        }
+
+        .recycle-bin-empty {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+
         /* ===== Controls Bar ===== */
         .controls {
             display: flex;
@@ -580,6 +639,10 @@
                     <span id="record-count">0</span>
                 </span>
                 <span class="status-item">
+                    <strong>נמחקו:</strong>
+                    <span id="deleted-count">0</span>
+                </span>
+                <span class="status-item">
                     <strong>נשמר לאחרונה:</strong>
                     <span id="last-saved">לא נשמר</span>
                 </span>
@@ -600,6 +663,10 @@
                 </button>
             </div>
             <div class="controls-left">
+                <button class="btn btn-secondary btn-recycle" id="btn-recycle-bin">
+                    🗑️ סל מיחזור
+                    <span class="recycle-badge" id="recycle-bin-badge"></span>
+                </button>
                 <div class="dropdown">
                     <button class="btn btn-secondary dropdown-btn" id="btn-export-import">
                         📤 ייצא/ייבא
@@ -769,6 +836,23 @@
         </div>
     </div>
 
+    <!-- Recycle Bin Modal -->
+    <div class="modal-overlay" id="recycle-bin-modal">
+        <div class="modal" style="max-width: 900px; width: 95%;">
+            <div class="modal-header">
+                <h2>🗑️ סל מיחזור</h2>
+                <button class="modal-close" id="recycle-bin-close">✕</button>
+            </div>
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <div id="recycle-bin-content"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="btn-empty-recycle-bin">מחק הכל לצמיתות</button>
+                <button class="btn btn-secondary" id="btn-close-recycle-bin">סגור</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ===== Constants =====
         const STORAGE_KEY = 'tapeLogRecords';
@@ -814,6 +898,7 @@
         const recordForm = document.getElementById('record-form');
         const searchInput = document.getElementById('search-input');
         const recordCountEl = document.getElementById('record-count');
+        const deletedCountEl = document.getElementById('deleted-count');
         const lastSavedEl = document.getElementById('last-saved');
         const importError = document.getElementById('import-error');
         const importFileInput = document.getElementById('import-file');
@@ -903,12 +988,38 @@
         }
 
         /**
-         * Delete a record
+         * Soft-delete a record (moves to recycle bin)
          */
         function deleteRecord(id) {
+            const record = records.find(r => r.id === id);
+            if (record) {
+                record.deletedAt = new Date().toISOString();
+                saveData();
+                renderTable();
+            }
+        }
+
+        /**
+         * Restore a soft-deleted record
+         */
+        function restoreRecord(id) {
+            const record = records.find(r => r.id === id);
+            if (record) {
+                delete record.deletedAt;
+                saveData();
+                renderTable();
+                renderRecycleBin();
+            }
+        }
+
+        /**
+         * Permanently remove a record (irreversible)
+         */
+        function permanentDeleteRecord(id) {
             records = records.filter(r => r.id !== id);
             saveData();
             renderTable();
+            renderRecycleBin();
         }
 
         // ===== Validation =====
@@ -947,6 +1058,7 @@
          */
         function checkDuplicate(formData, excludeId = null) {
             return records.some(r => {
+                if (r.deletedAt) return false;
                 if (excludeId && r.id === excludeId) return false;
                 return r.tapeName === formData.tapeName &&
                        r.lastBackupAt === formData.lastBackupAt &&
@@ -987,13 +1099,14 @@
          */
         function renderTable() {
             const searchTerm = searchInput.value.toLowerCase().trim();
-            let filteredRecords = applyFilters(records, searchTerm);
+            const activeRecords = records.filter(r => !r.deletedAt);
+            let filteredRecords = applyFilters(activeRecords, searchTerm);
 
             // Sort records
             filteredRecords = sortRecords(filteredRecords, sortColumn, sortDirection);
 
             // Update empty state visibility
-            if (records.length === 0) {
+            if (activeRecords.length === 0) {
                 emptyState.classList.remove('hidden');
                 tableBody.innerHTML = '';
             } else {
@@ -1118,7 +1231,8 @@
          * Export records to CSV
          */
         function exportCSV() {
-            if (records.length === 0) {
+            const activeRecords = records.filter(r => !r.deletedAt);
+            if (activeRecords.length === 0) {
                 showImportError('אין רשומות לייצוא');
                 return;
             }
@@ -1128,7 +1242,7 @@
             const rows = [headers];
 
             // Add data rows
-            records.forEach(record => {
+            activeRecords.forEach(record => {
                 const row = FIELDS.map(field => {
                     const value = record[field] || '';
                     // Escape CSV: wrap in quotes if contains comma, newline, or quote
@@ -1152,12 +1266,13 @@
          * Export records to JSON
          */
         function exportJSON() {
-            if (records.length === 0) {
+            const activeRecords = records.filter(r => !r.deletedAt);
+            if (activeRecords.length === 0) {
                 showImportError('אין רשומות לייצוא');
                 return;
             }
 
-            const jsonContent = JSON.stringify(records, null, 2);
+            const jsonContent = JSON.stringify(activeRecords, null, 2);
             downloadFile(jsonContent, 'tape-log.json', 'application/json;charset=utf-8');
         }
 
@@ -1324,7 +1439,18 @@
          * Update status bar
          */
         function updateStatus() {
-            recordCountEl.textContent = records.length;
+            const activeCount = records.filter(r => !r.deletedAt).length;
+            const deletedCount = records.filter(r => r.deletedAt).length;
+            recordCountEl.textContent = activeCount;
+            deletedCountEl.textContent = deletedCount;
+
+            const badge = document.getElementById('recycle-bin-badge');
+            if (deletedCount > 0) {
+                badge.textContent = deletedCount;
+                badge.classList.add('visible');
+            } else {
+                badge.classList.remove('visible');
+            }
 
             const lastSaved = localStorage.getItem(STORAGE_TIMESTAMP_KEY);
             lastSavedEl.textContent = lastSaved || 'לא נשמר';
@@ -1346,6 +1472,65 @@
         function hideConfirm() {
             confirmModal.classList.remove('active');
             confirmCallback = null;
+        }
+
+        /**
+         * Open recycle bin modal
+         */
+        function openRecycleBin() {
+            renderRecycleBin();
+            document.getElementById('recycle-bin-modal').classList.add('active');
+        }
+
+        /**
+         * Close recycle bin modal
+         */
+        function closeRecycleBin() {
+            document.getElementById('recycle-bin-modal').classList.remove('active');
+        }
+
+        /**
+         * Render the recycle bin content
+         */
+        function renderRecycleBin() {
+            const deletedRecords = records.filter(r => r.deletedAt);
+            const container = document.getElementById('recycle-bin-content');
+            const emptyRecycleBinBtn = document.getElementById('btn-empty-recycle-bin');
+
+            if (deletedRecords.length === 0) {
+                container.innerHTML = `<p class="recycle-bin-empty">סל המיחזור ריק</p>`;
+                emptyRecycleBinBtn.disabled = true;
+                return;
+            }
+
+            emptyRecycleBinBtn.disabled = false;
+            container.innerHTML = `
+                <table class="recycle-bin-table">
+                    <thead>
+                        <tr>
+                            <th>ברקוד קלטת</th>
+                            <th>תאריך גיבוי</th>
+                            <th>יעד אופסייט</th>
+                            <th>נמחק בתאריך</th>
+                            <th>פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${deletedRecords.map(r => `
+                            <tr>
+                                <td>${escapeHtml(r.tapeName || '')}</td>
+                                <td>${formatDate(r.lastBackupAt)}</td>
+                                <td>${escapeHtml(r.offsiteDestination || '')}</td>
+                                <td>${formatDate(r.deletedAt)}</td>
+                                <td class="actions-cell">
+                                    <button class="btn btn-secondary btn-sm btn-restore" data-id="${r.id}" title="שחזר">♻️ שחזר</button>
+                                    <button class="btn btn-danger btn-sm btn-perm-delete" data-id="${r.id}" title="מחק לצמיתות">🗑️ מחק לצמיתות</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
         }
 
         /**
@@ -1499,6 +1684,44 @@
 
             // Add button
             document.getElementById('btn-add').addEventListener('click', openAddForm);
+
+            // Recycle bin
+            document.getElementById('btn-recycle-bin').addEventListener('click', openRecycleBin);
+            document.getElementById('recycle-bin-close').addEventListener('click', closeRecycleBin);
+            document.getElementById('btn-close-recycle-bin').addEventListener('click', closeRecycleBin);
+            document.getElementById('recycle-bin-modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('recycle-bin-modal')) closeRecycleBin();
+            });
+            document.getElementById('btn-empty-recycle-bin').addEventListener('click', () => {
+                showConfirm(
+                    'מחק הכל לצמיתות',
+                    'האם אתה בטוח שברצונך למחוק לצמיתות את כל הרשומות בסל המיחזור? פעולה זו אינה הפיכה.',
+                    () => {
+                        records = records.filter(r => !r.deletedAt);
+                        saveData();
+                        renderTable();
+                        renderRecycleBin();
+                        hideConfirm();
+                    }
+                );
+            });
+            document.getElementById('recycle-bin-content').addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn) return;
+                const id = btn.dataset.id;
+                if (btn.classList.contains('btn-restore')) {
+                    restoreRecord(id);
+                } else if (btn.classList.contains('btn-perm-delete')) {
+                    showConfirm(
+                        'מחק לצמיתות',
+                        'האם אתה בטוח שברצונך למחוק רשומה זו לצמיתות? פעולה זו אינה הפיכה.',
+                        () => {
+                            permanentDeleteRecord(id);
+                            hideConfirm();
+                        }
+                    );
+                }
+            });
 
             // Export/Import dropdown
             const exportImportBtn = document.getElementById('btn-export-import');
